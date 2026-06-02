@@ -19,7 +19,7 @@ ALLOWED_PDF_SUFFIX = ".pdf"
 
 # get all key and value from STATUS_LABEL_EN
 STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values())
-STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - {"OK"}
+STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached"}
 
 
 def format_preview_value(value: object) -> str:
@@ -37,7 +37,7 @@ def workbook_preview(xlsx_path: Path) -> list[dict[str, object]]:
     for worksheet in workbook.worksheets[:2]:
         rows = []
         max_rows = min(worksheet.max_row or 0, 20)
-        max_cols = min(worksheet.max_column or 0, 8)
+        max_cols = min(worksheet.max_column or 0, 10)
         for row in worksheet.iter_rows(min_row=1, max_row=max_rows, max_col=max_cols, values_only=True):
             rows.append([format_preview_value(cell) for cell in row])
 
