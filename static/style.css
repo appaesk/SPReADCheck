@@ -383,6 +383,14 @@ tbody tr:nth-child(even) td {
   background: rgba(30, 91, 127, 0.03);
 }
 
+tbody tr.row-warning td {
+  background: rgba(242, 143, 59, 0.14);
+}
+
+tbody tr.row-warning:nth-child(even) td {
+  background: rgba(242, 143, 59, 0.18);
+}
+
 @media (max-width: 920px) {
   .layout {
     grid-template-columns: 1fr;

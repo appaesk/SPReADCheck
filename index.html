@@ -96,10 +96,6 @@
 
       let pyodideReady = null;
 
-      function sanitizeName(name) {
-        return name.replace(/[^A-Za-z0-9._-]/g, "_");
-      }
-
       function setRuntimeState(text, isError = false) {
         runtimeStatus.textContent = text;
         runtimeStatus.classList.toggle("error", isError);
@@ -154,7 +150,7 @@
       async function queueFiles(paths) {
         for (const file of fileInput.files) {
           const data = new Uint8Array(await file.arrayBuffer());
-          const path = `/uploads/${sanitizeName(file.name)}`;
+          const path = `/uploads/${file.name}`;
           pyodideReady.FS.mkdirTree("/uploads");
           pyodideReady.FS.writeFile(path, data);
           paths.push(path);

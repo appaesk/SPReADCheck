@@ -76,8 +76,10 @@ def render_preview_html(previews: list[dict[str, object]]) -> str:
         header_cells = "".join(f"<th>{html.escape(str(cell))}</th>" for cell in sheet["header"])
         body_rows = []
         for row in sheet["rows"]:
+            row_has_warning = any(isinstance(cell, str) and "要確認" in cell for cell in row)
+            row_class = ' class="row-warning"' if row_has_warning else ""
             body_cells = "".join(f"<td>{html.escape(str(cell))}</td>" for cell in row)
-            body_rows.append(f"<tr>{body_cells}</tr>")
+            body_rows.append(f"<tr{row_class}>{body_cells}</tr>")
 
         sections.append(
             """
