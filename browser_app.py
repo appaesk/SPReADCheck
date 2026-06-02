@@ -11,11 +11,13 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 from form_self_check_v1 import run as run_form_checker
-from research_plan_self_check_v1 import run as run_research_plan_checker
+from research_plan_self_check_v1 import run as run_research_plan_checker, STATUS_LABEL_EN
 
 
 ALLOWED_EXCEL_SUFFIXES = {".xlsx", ".xlsm"}
 ALLOWED_PDF_SUFFIX = ".pdf"
+
+STATUS_LABEL_ALL = {**STATUS_LABEL_EN}
 
 
 def format_preview_value(value: object) -> str:
@@ -60,13 +62,15 @@ def summarize_preview(previews: list[dict[str, object]]) -> dict[str, int]:
     for sheet in previews:
         for row in sheet["rows"]:
             for cell in row:
-                if isinstance(cell, str) and cell in {"OK", "要確認"}:
+                # if isinstance(cell, str) and cell in {"OK", "要確認"}:
+                if not isinstance(cell, str) and cell in STATUS_LABEL_ALL:
                     status_words[cell] += 1
 
     return {
         "sheet_count": len(previews),
         "ok_count": status_words.get("OK", 0),
-        "needs_review_count": status_words.get("要確認", 0),
+        # "needs_review_count": status_words.get("要確認", 0),
+        "needs_review_count": sum(count for word, count in status_words.items() if word in STATUS_LABEL_ALL and word != "OK"),
     }
 
 

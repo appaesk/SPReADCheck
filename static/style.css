@@ -85,7 +85,7 @@ h1, h2, h3 {
 h1 {
   margin-top: 16px;
   font-size: clamp(2.2rem, 5vw, 4.4rem);
-  max-width: 10ch;
+  /* max-width: 10ch; */
 }
 
 h2 {
@@ -93,7 +93,7 @@ h2 {
 }
 
 .lede {
-  max-width: 64ch;
+  /* max-width: 64ch; */
   margin: 16px 0 0;
   color: var(--muted);
   line-height: 1.65;
@@ -283,6 +283,7 @@ button:hover, .button:hover {
 
 .preview-card {
   margin-top: 18px;
+  padding: 12px;
 }
 
 .preview-card h3 {
