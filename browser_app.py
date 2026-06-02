@@ -19,6 +19,7 @@ ALLOWED_PDF_SUFFIX = ".pdf"
 
 # get all key and value from STATUS_LABEL_EN
 STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values())
+STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - {"OK"}
 
 
 def format_preview_value(value: object) -> str:
@@ -42,7 +43,8 @@ def workbook_preview(xlsx_path: Path) -> list[dict[str, object]]:
 
         header = rows[0] if rows else []
         body = rows[1:] if len(rows) > 1 else []
-        alert_count = sum(1 for row in rows for cell in row if isinstance(cell, str) and "要確認" in cell)
+        # alert_count = sum(1 for row in rows for cell in row if isinstance(cell, str) and "要確認" in cell)
+        alert_count = sum(1 for row in rows for cell in row if isinstance(cell, str) and cell in STATUS_LABEL_NOT_OK)
 
         previews.append(
             {
@@ -64,14 +66,14 @@ def summarize_preview(previews: list[dict[str, object]]) -> dict[str, int]:
         for row in sheet["rows"]:
             for cell in row:
                 # if isinstance(cell, str) and cell in {"OK", "要確認"}:
-                if not isinstance(cell, str) and cell in STATUS_LABEL_ALL:
+                if isinstance(cell, str) and cell in STATUS_LABEL_ALL:
                     status_words[cell] += 1
 
     return {
         "sheet_count": len(previews),
         "ok_count": status_words.get("OK", 0),
         # "needs_review_count": status_words.get("要確認", 0),
-        "needs_review_count": sum(count for word, count in status_words.items() if word in STATUS_LABEL_ALL and word != "OK"),
+        "needs_review_count": sum(count for word, count in status_words.items() if word in STATUS_LABEL_NOT_OK),
     }
 
 
@@ -81,7 +83,8 @@ def render_preview_html(previews: list[dict[str, object]]) -> str:
         header_cells = "".join(f"<th>{html.escape(str(cell))}</th>" for cell in sheet["header"])
         body_rows = []
         for row in sheet["rows"]:
-            row_has_warning = any(isinstance(cell, str) and "要確認" in cell for cell in row)
+            # row_has_warning = any(isinstance(cell, str) and "要確認" in cell for cell in row)
+            row_has_warning = any(isinstance(cell, str) and cell in STATUS_LABEL_NOT_OK for cell in row)
             row_class = ' class="row-warning"' if row_has_warning else ""
             body_cells = "".join(f"<td>{html.escape(str(cell))}</td>" for cell in row)
             body_rows.append(f"<tr{row_class}>{body_cells}</tr>")
