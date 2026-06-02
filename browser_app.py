@@ -18,8 +18,13 @@ ALLOWED_EXCEL_SUFFIXES = {".xlsx", ".xlsm"}
 ALLOWED_PDF_SUFFIX = ".pdf"
 
 # get all key and value from STATUS_LABEL_EN
-STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values())
-STATUS_LABEL_OK = {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached"}
+OK_STATUSES = {"OK", "記入済み", "チェック済み"}
+NON_BLOCKING_STATUSES = {"未チェック（学生の場合必須）"}
+SCAN_PDF_STATUS = "判断不可（PDFスキャン不可につき判断不可）"
+NG_PREFIXES = ("要確認", "未記入", "未チェック", "読込エラー", "様式不明", "日付要確認", "判定不可", SCAN_PDF_STATUS)
+
+STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values()) | OK_STATUSES | NON_BLOCKING_STATUSES | {SCAN_PDF_STATUS}
+STATUS_LABEL_OK = {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached", "チェック済み", "Checked"}
 STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - STATUS_LABEL_OK
 
 
