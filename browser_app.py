@@ -17,7 +17,8 @@ from research_plan_self_check_v1 import run as run_research_plan_checker, STATUS
 ALLOWED_EXCEL_SUFFIXES = {".xlsx", ".xlsm"}
 ALLOWED_PDF_SUFFIX = ".pdf"
 
-STATUS_LABEL_ALL = {**STATUS_LABEL_EN}
+# get all key and value from STATUS_LABEL_EN
+STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values())
 
 
 def format_preview_value(value: object) -> str:
