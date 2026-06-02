@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --bg: #f3efe7;
+  --bg: #f9dfaa;
   --panel: rgba(255, 255, 255, 0.82);
   --panel-strong: #ffffff;
   --text: #132238;
@@ -24,9 +24,9 @@ body {
   font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(242, 143, 59, 0.22), transparent 34%),
+    radial-gradient(circle at top left, rgba(242, 202, 59, 0.609), transparent 34%),
     radial-gradient(circle at right 18%, rgba(30, 91, 127, 0.16), transparent 28%),
-    linear-gradient(180deg, #f8f4ee 0%, var(--bg) 100%);
+    linear-gradient(180deg, #81CDEA 0%, var(--bg) 100%);
 }
 
 body::before {
