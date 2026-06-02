@@ -19,7 +19,8 @@ ALLOWED_PDF_SUFFIX = ".pdf"
 
 # get all key and value from STATUS_LABEL_EN
 STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values())
-STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached"}
+STATUS_LABEL_OK = {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached"}
+STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - STATUS_LABEL_OK
 
 
 def format_preview_value(value: object) -> str:
@@ -71,7 +72,8 @@ def summarize_preview(previews: list[dict[str, object]]) -> dict[str, int]:
 
     return {
         "sheet_count": len(previews),
-        "ok_count": status_words.get("OK", 0),
+        # "ok_count": status_words.get("OK", 0),
+        "ok_count": sum(count for word, count in status_words.items() if word in STATUS_LABEL_OK),
         # "needs_review_count": status_words.get("要確認", 0),
         "needs_review_count": sum(count for word, count in status_words.items() if word in STATUS_LABEL_NOT_OK),
     }
