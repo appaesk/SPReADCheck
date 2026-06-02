@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>SPReAD Self-Check for GitHub Pages</title>
+    <link rel="stylesheet" href="static/style.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero card">
+        <div class="eyebrow">SPReAD Self-Check</div>
+        <h1>Run the checker directly in your browser.</h1>
+        <p class="lede">
+          This GitHub Pages version loads Python in the browser with Pyodide, keeps the upload in memory only,
+          and shows the same summary/detail workbook output as the desktop tools.
+        </p>
+        <div class="badges">
+          <span>GitHub Pages ready</span>
+          <span>Browser-side Python</span>
+          <span>No server upload storage</span>
+        </div>
+      </section>
+
+      <section class="layout browser-layout">
+        <form class="card panel upload-card" id="check-form">
+          <h2>Upload and check</h2>
+
+          <div id="runtime-status" class="runtime-status loading">Loading Python runtime...</div>
+
+          <label for="mode">Checker</label>
+          <select id="mode" name="mode" disabled>
+            <option value="auto" selected>Auto-detect from file type</option>
+            <option value="research">Research Plan Application Form (.xlsx / .xlsm)</option>
+            <option value="forms">Other Application Forms (.pdf)</option>
+          </select>
+
+          <label for="files">Files</label>
+          <input id="files" name="files" type="file" multiple disabled>
+          <p class="hint">Research Plan mode accepts one Excel file. Application Form mode accepts one or more PDF files.</p>
+
+          <button id="run-button" type="submit" disabled>Run format check</button>
+
+          <div class="smallprint">
+            The browser stores the files only in memory while the check runs. Nothing is sent to a backend server.
+          </div>
+        </form>
+
+        <aside class="card panel notes">
+          <h2>How this works</h2>
+          <ul>
+            <li>GitHub Pages serves this as a static site.</li>
+            <li>Pyodide loads Python in the browser and installs the needed packages.</li>
+            <li>The existing checker scripts are fetched into the browser file system and executed there.</li>
+            <li>The result workbook is generated in memory and offered as a download.</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="card panel results-shell">
+        <div class="section-head">
+          <h2>Result preview</h2>
+          <a id="download-link" class="button primary download-link hidden" href="#" download>Download result workbook</a>
+        </div>
+        <div id="result-summary" class="metric-grid">
+          <div class="metric-card">
+            <div class="metric-value">-</div>
+            <div class="metric-label">Sheets previewed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">-</div>
+            <div class="metric-label">OK markers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value">-</div>
+            <div class="metric-label">Needs-review markers</div>
+          </div>
+        </div>
+        <div id="result-message" class="hint result-message">Upload a file to begin.</div>
+        <div id="preview-container" class="preview-container"></div>
+      </section>
+    </main>
+
+    <script>
+      const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.4/full/";
+      const runtimeStatus = document.getElementById("runtime-status");
+      const modeSelect = document.getElementById("mode");
+      const fileInput = document.getElementById("files");
+      const runButton = document.getElementById("run-button");
+      const downloadLink = document.getElementById("download-link");
+      const resultMessage = document.getElementById("result-message");
+      const previewContainer = document.getElementById("preview-container");
+      const summaryCards = [...document.querySelectorAll("#result-summary .metric-card .metric-value")];
+
+      let pyodideReady = null;
+
+      function sanitizeName(name) {
+        return name.replace(/[^A-Za-z0-9._-]/g, "_");
+      }
+
+      function setRuntimeState(text, isError = false) {
+        runtimeStatus.textContent = text;
+        runtimeStatus.classList.toggle("error", isError);
+        runtimeStatus.classList.toggle("ready", !isError && text === "Ready");
+      }
+
+      function setBusyState(isBusy) {
+        runButton.disabled = isBusy || !pyodideReady;
+        fileInput.disabled = isBusy || !pyodideReady;
+        modeSelect.disabled = isBusy || !pyodideReady;
+        runButton.textContent = isBusy ? "Running..." : "Run format check";
+      }
+
+      async function bootstrapPyodide() {
+        try {
+          setRuntimeState("Loading Python runtime...");
+          const pyodide = await loadPyodide({ indexURL: PYODIDE_URL });
+          await pyodide.loadPackage("micropip");
+          const micropip = pyodide.pyimport("micropip");
+          await micropip.install(["openpyxl", "pypdf", "pdfminer.six"]);
+
+          for (const fileName of ["browser_app.py", "research_plan_self_check_v1.py", "form_self_check_v1.py"]) {
+            const response = await fetch(fileName, { cache: "no-store" });
+            if (!response.ok) {
+              throw new Error(`Unable to load ${fileName}`);
+            }
+            const text = await response.text();
+            pyodide.FS.writeFile(`/${fileName}`, text);
+          }
+
+          await pyodide.runPythonAsync(`import sys\nsys.path.insert(0, "/")`);
+          pyodideReady = pyodide;
+          setRuntimeState("Ready");
+          setBusyState(false);
+        } catch (error) {
+          console.error(error);
+          setRuntimeState(`Runtime load failed: ${error.message}`, true);
+          resultMessage.textContent = "The browser runtime could not be loaded.";
+        }
+      }
+
+      function clearResults() {
+        previewContainer.innerHTML = "";
+        downloadLink.classList.add("hidden");
+        downloadLink.href = "#";
+        resultMessage.textContent = "Running checks...";
+        summaryCards.forEach((node) => {
+          node.textContent = "-";
+        });
+      }
+
+      async function queueFiles(paths) {
+        for (const file of fileInput.files) {
+          const data = new Uint8Array(await file.arrayBuffer());
+          const path = `/uploads/${sanitizeName(file.name)}`;
+          pyodideReady.FS.mkdirTree("/uploads");
+          pyodideReady.FS.writeFile(path, data);
+          paths.push(path);
+        }
+      }
+
+      document.getElementById("check-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!pyodideReady) {
+          return;
+        }
+
+        if (!fileInput.files.length) {
+          resultMessage.textContent = "Please choose at least one file.";
+          return;
+        }
+
+        setBusyState(true);
+        clearResults();
+
+        try {
+          const paths = [];
+          await queueFiles(paths);
+          const mode = modeSelect.value;
+          pyodideReady.globals.set("mode", mode);
+          pyodideReady.globals.set("paths", paths);
+          const result = await pyodideReady.runPythonAsync(`
+from browser_app import run_check
+import json
+json.loads(run_check(mode, paths))
+`);
+
+          summaryCards[0].textContent = String(result.sheet_count);
+          summaryCards[1].textContent = String(result.ok_count);
+          summaryCards[2].textContent = String(result.needs_review_count);
+          resultMessage.textContent = result.message;
+          previewContainer.innerHTML = result.preview_html;
+          if (result.download_href) {
+            downloadLink.href = result.download_href;
+            downloadLink.download = result.download_name;
+            downloadLink.classList.remove("hidden");
+          }
+        } catch (error) {
+          console.error(error);
+          resultMessage.textContent = error.message || String(error);
+          previewContainer.innerHTML = "";
+        } finally {
+          setBusyState(false);
+        }
+      });
+
+      bootstrapPyodide();
+    </script>
+  </body>
+</html>
