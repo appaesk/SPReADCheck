@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SPReAD Self-Check Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero card compact">
+        <div class="eyebrow">Check complete</div>
+        <h1>Your result workbook is ready.</h1>
+        <p class="lede">
+          The checker finished successfully and produced a downloadable Excel result file.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="{{ download_url }}">Download {{ result_filename }}</a>
+          <a class="button secondary" href="{{ url_for('index') }}">Run another file</a>
+        </div>
+      </section>
+
+      <section class="layout stack">
+        <div class="card stats">
+          <div>
+            <div class="stat-value">{{ summary.sheet_count }}</div>
+            <div class="stat-label">Preview sheets</div>
+          </div>
+          <div>
+            <div class="stat-value">{{ summary.ok_count }}</div>
+            <div class="stat-label">OK cells found</div>
+          </div>
+          <div>
+            <div class="stat-value">{{ summary.needs_review_count }}</div>
+            <div class="stat-label">Needs-review cells found</div>
+          </div>
+        </div>
+
+        {% for sheet in preview %}
+          <section class="card panel preview-card">
+            <div class="sheet-head">
+              <div>
+                <h2>{{ sheet.title }}</h2>
+                <p>{{ sheet.row_count }} preview rows · {{ sheet.column_count }} columns · {{ sheet.alert_count }} review markers</p>
+              </div>
+            </div>
+
+            {% if sheet.header %}
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      {% for cell in sheet.header %}
+                        <th>{{ cell }}</th>
+                      {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in sheet.rows %}
+                      <tr>
+                        {% for cell in row %}
+                          <td>{{ cell }}</td>
+                        {% endfor %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="hint">This sheet does not contain previewable rows.</p>
+            {% endif %}
+          </section>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>

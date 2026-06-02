@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SPReAD Self-Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero card">
+        <div class="eyebrow">SPReAD Self-Check Tool</div>
+        <h1>Upload a file and check the format in one step.</h1>
+        <p class="lede">
+          This web app runs the existing Python checkers in memory, shows a result preview,
+          and removes the uploaded file after processing.
+        </p>
+        <div class="badges">
+          <span>English UI</span>
+          <span>No upload storage</span>
+          <span>Excel + PDF support</span>
+        </div>
+      </section>
+
+      <section class="layout">
+        <form class="card panel" action="{{ url_for('check') }}" method="post" enctype="multipart/form-data">
+          <h2>Start a check</h2>
+
+          {% if error_message %}
+            <div class="alert error">{{ error_message }}</div>
+          {% endif %}
+
+          <label for="mode">Checker</label>
+          <select id="mode" name="mode">
+            <option value="auto" selected>Auto-detect from file type</option>
+            <option value="research">Research Plan Application Form (.xlsx / .xlsm)</option>
+            <option value="forms">Other Application Forms (.pdf)</option>
+          </select>
+
+          <label for="files">Files</label>
+          <input id="files" name="files" type="file" multiple>
+          <p class="hint">
+            Research Plan mode accepts one Excel file. Application Form mode accepts one or more PDF files.
+          </p>
+
+          <button type="submit">Run format check</button>
+
+          <div class="smallprint">
+            The uploaded file is written only to a temporary folder during processing and is deleted after the result is generated.
+          </div>
+        </form>
+
+        <aside class="card panel notes">
+          <h2>What gets checked</h2>
+          <ul>
+            <li><strong>Research Plan Application Form</strong> uses <code>research_plan_self_check_v1.py</code>.</li>
+            <li><strong>Other Application Forms</strong> use <code>form_self_check_v1.py</code>.</li>
+            <li>The result workbook keeps the same two-sheet structure described in the README: summary and detail.</li>
+            <li>The preview page shows the first rows of each output sheet so users can spot issues quickly.</li>
+          </ul>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>
