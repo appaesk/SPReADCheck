@@ -36,7 +36,7 @@ def workbook_preview(xlsx_path: Path) -> list[dict[str, object]]:
 
     for worksheet in workbook.worksheets[:2]:
         rows = []
-        max_rows = min(worksheet.max_row or 0, 20)
+        max_rows = min(worksheet.max_row or 0, 50)
         max_cols = min(worksheet.max_column or 0, 10)
         for row in worksheet.iter_rows(min_row=1, max_row=max_rows, max_col=max_cols, values_only=True):
             rows.append([format_preview_value(cell) for cell in row])
@@ -95,7 +95,7 @@ def render_preview_html(previews: list[dict[str, object]]) -> str:
               <div class="sheet-head">
                 <div>
                   <h3>{title}</h3>
-                  <p>{row_count} preview rows · {column_count} columns · {alert_count} review markers</p>
+                  <p>Show only first 50 rows | {row_count} preview rows · {column_count} columns · {alert_count} review markers</p>
                 </div>
               </div>
               <div class="table-wrap">
