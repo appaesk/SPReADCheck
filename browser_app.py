@@ -43,7 +43,7 @@ def workbook_preview(xlsx_path: Path) -> list[dict[str, object]]:
     for worksheet in workbook.worksheets[:2]:
         rows = []
         max_rows = min(worksheet.max_row or 0, 50)
-        max_cols = min(worksheet.max_column or 0, 10)
+        max_cols = min(worksheet.max_column or 0, 12)
         for row in worksheet.iter_rows(min_row=1, max_row=max_rows, max_col=max_cols, values_only=True):
             rows.append([format_preview_value(cell) for cell in row])
 
