@@ -23,7 +23,7 @@ NON_BLOCKING_STATUSES = {"未チェック（学生の場合必須）"}
 SCAN_PDF_STATUS = "判断不可（PDFスキャン不可につき判断不可）"
 NG_PREFIXES = {"要確認", "未記入", "未チェック", "読込エラー", "様式不明", "日付要確認", "判定不可", SCAN_PDF_STATUS}
 
-STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values()) | OK_STATUSES | NON_BLOCKING_STATUSES | {SCAN_PDF_STATUS} | NG_PREFIXES
+STATUS_LABEL_ALL = set(STATUS_LABEL_EN.keys()) | set(STATUS_LABEL_EN.values()) | OK_STATUSES | NON_BLOCKING_STATUSES | {SCAN_PDF_STATUS} | NG_PREFIXES | {"要確認（ファイル名形式）"}
 STATUS_LABEL_OK = {"OK", "記入済み", "Completed", "金額OK", "Amount OK", "添付済み", "Attached", "チェック済み", "Checked"}
 STATUS_LABEL_NOT_OK = STATUS_LABEL_ALL - STATUS_LABEL_OK
 
@@ -93,7 +93,10 @@ def render_preview_html(previews: list[dict[str, object]]) -> str:
             # row_has_warning = any(isinstance(cell, str) and "要確認" in cell for cell in row)
             row_has_warning = any(isinstance(cell, str) and cell in STATUS_LABEL_NOT_OK for cell in row)
             row_class = ' class="row-warning"' if row_has_warning else ""
-            body_cells = "".join(f"<td>{html.escape(str(cell))}</td>" for cell in row)
+            body_cells = "".join(
+                f"<td{' class=\"cell-warning\"' if isinstance(cell, str) and cell in STATUS_LABEL_NOT_OK else ''}>{html.escape(str(cell))}</td>"
+                for cell in row
+            )
             body_rows.append(f"<tr{row_class}>{body_cells}</tr>")
 
         sections.append(
