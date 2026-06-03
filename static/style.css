@@ -296,7 +296,7 @@ button:hover, .button:hover {
 }
 
 .notes ul {
-  margin: 14px 0 0;
+  margin: 14px 0;
   padding-left: 20px;
 }
 
@@ -389,17 +389,17 @@ tbody tr.row-warning td {
 }
 
 tbody tr.row-warning:nth-child(even) td {
-  /* background: rgba(242, 59, 59, 0.18); */
-  color: rgb(147, 0, 0); 
+  background: rgba(242, 59, 59, 0.18);
 }
 
-tbody tr.cell-warning td {
+tbody tr.row-warning td.cell-warning {
   /* background: rgba(242, 59, 59, 0.14); */
   color: rgb(147, 0, 0); 
 }
 
-tbody tr.cell-warning:nth-child(even) td {
-  background: rgba(242, 59, 59, 0.18);
+tbody tr.row-warning:nth-child(even) td.cell-warning {
+  /* background: rgba(242, 59, 59, 0.18); */
+  color: rgb(147, 0, 0); 
 }
 
 @media (max-width: 920px) {
